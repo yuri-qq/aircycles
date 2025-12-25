@@ -30,7 +30,25 @@ Also, for fun, to learn to work with wood, to use the laser cutter at the local 
 
 ## Is it any good?
 
-For air filtering, we expect it to perform just as well as the cleanairkits Luggables "5 SickleFlow DIY KIT". Their website has plenty of information about efficiency.
+For air filtering, we expect it to perform at least as well as the cleanairkits [Luggables "5 SickleFlow DIY KIT"](https://www.cleanairkits.com/en-eu/products/luggables-europe?variant=51819663655212). Their website has plenty of information about efficiency.
+
+We don't have any budget to do real testing ourselves, but we can do a rough estimation of Dust/Virus CADR by multiplying the sum of CFM of all fans by 0.7. This ignores several variables, like pressure specs of the fans and size of the filters, but hopefully errs on the conservative side.
+
+| Cleanairkits designs           | Raw CFM | Dust CADR (measured)  |
+| ------------------------------ | ------- | --------------------- |
+| 5 Sickleflow (16x25x1")        | 310     | 218                   |
+| 7 Sickleflow (20x25x1")        | 434     | 323                   |
+| 7 Mobius 120p (20x25x1")       | 526     | 401                   |
+
+All our variants use 20x20x1" filters, equivalent to the 16x25x1" ones. Almost all of them have 5 fans, but except the last one in this list which has 6 as an experiment.
+
+| Variants we've used in v1      | Raw CFM | Dust CADR (estimated) |
+| ------------------------------ | ------- | --------------------- |
+| 5 Mobius 120                   | 316     | 221                   |
+| 5 Mobius 120 OC                | 441     | 308                   |
+| 3 Mobius, 2 Mobius OC          | 366     | 256                   |
+| 2 Mobius, 2 Mobius OC, 1 Sunon | 441     | 309                   |
+| 2 Mobius, 3 Mobius OC, 1 Sunon | 530     | 371                   |
 
 In the current iteration, it is not necessarily cheaper or easier to build. Our project is more focused on ease of disassembly, reassembly, and storage.
 
@@ -58,15 +76,23 @@ These filters are typically easily acquirable in europe through digikey, althoug
 
 ### Fans
 
-Five Coolermaster Mobius 120 or Mobius 120 OC (120mm)
+A mix of five of these 120mm fans:
+
+* Coolermaster Mobius 120
+* Coolermaster Mobius 120 OC
+* Sunon EEC0381B1-000U-A99
+
+Typically three Mobius 120 OC and two Mobius 120.
 
 Primarily inspired by cleanairkits, these fans have a great balance of static pressure specs and noise levels.
 
 The Mobius 120 OC variant is slighly noisier but has significantly better static pressure, and happened to be cheaper at times.
 
-In some cases where noise is more tolerated, we added some Sunon fans to the mix, since they have excellent static pressure specs.
+In some cases where noise is more tolerated, we added some Sunon fans (EEC0381B1-000U-A99) to the mix, which have excellent static pressure specs, better airflow, more professional datasheets, but are completely uninterested in being quiet.
 
-**Next year:** no changes planned.
+**Considered but rejected:** Everyone loves Noctua but most of their fans focus on airflow, not static pressure, so they are not suitable for putting a filter in front of them. Only their newest model, "NF-A12x25 G2 PWM", has slightly better pressure than the Mobius 120 at the same noise level and airflow, but for three times the price.
+
+**Next year:** possibly more Sunon fans in the mix, as we found some locations are very tolerant of noise.
 
 ### Laser cut frame
 
