@@ -6,7 +6,10 @@ Air Cycles is our budget air purifier design for 39C3 (slogan "Power Cycles").
 
 It is a [Corsi-Rosenthal box][cr] heavily inspired by the "Luggable" design by [cleanairkits][] (5 fans version).
 
-![Photo of a fully assembled unit](img/photo.jpg)
+<table><tr>
+   <td><img src="img/photo.jpg" alt="Photo of a fully assembled unit"></td>
+   <td><img src="img/case-preview.png" alt="Preview 3D render in openscad"></td>
+</tr></table>
 
 [cr]: https://en.wikipedia.org/wiki/Corsi%E2%80%93Rosenthal_Box
 [cleanairkits]: https://www.cleanairkits.com
