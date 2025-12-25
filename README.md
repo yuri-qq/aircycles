@@ -159,12 +159,39 @@ This is a draft, we don't necessarily recommend building one, but please reach o
 * Power supply (12V, 1-3 A depending on fans)
 * Wires for power (thick enough)
 
+### Files in this repo
+
+The openscad source files are at the root:
+
+* `case.scad`: Outputs the laser cut box (on render) and the 3D printed corner pieces ("triangle_only" in the parameters)
+* `fan-shroud.scad`: For 3D printing
+* `power-mount-cylinder.scad`: For 3D printing
+
+And these two optional parts:
+
+* `fan-cover.scad`: For 3D printing, alternative to the shroud when one fan is missing.
+* `power-mount-flat.scad`: For 3D printing, simpler version of the power mount
+
+The `rendered` subdirectory contains dxf (for laser cutting) and stl (for 3D printing) files for 4mm and 6mm material thickness, all with 498x498x20mm filters and 120mm fans.
+
+A complete unit is made of these parts:
+
+* 1x case-?mm.dxf
+* 2x corner-?mm-feet.stl
+* 2x corner-?mm-feetalt.stl
+* 4x corner-?mm-nofeet.stl
+* 5x fan-shroud.stl (or fan-cover.stl)
+* 1x power-mount-cylinder.stl or power-mount-flat.stl
+
 ### Steps
 
 * Buy wood
 * Laser cut box out of wood
 * Optionally postprocess wood (sanding, coating)
-* 3D print corners and shrouds
+* 3D print corners, shrouds, power mount
+    * The files are already in the preferred print orientation
+    * 0.25mm layer height is fine
+    * PETG preferred
 * Install heat set inserts to corners
 * Find which side of wood to put together (more preferable bend direction, less ugly side)
 * Screw on the machine screw / wood screw attachment on the wood
