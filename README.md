@@ -1,3 +1,5 @@
+![Logo](img/logo-web.png)
+
 # Air Cycles
 
 Air Cycles is our budget air purifier design for 39C3 (slogan "Power Cycles").
