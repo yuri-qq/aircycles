@@ -28,6 +28,7 @@ middle_piece_teeth_size = 20;
 middle_piece_teeth_count = 4;  // must be an even number
 
 corner_tri_size = 50;
+corner_tri_thickness = 2;
 screw_hole_side_offsets = [10+material_thickness, corner_tri_size-10-material_thickness];
 screw_hole_inward_offset = filter_depth + material_thickness + 3;
 
@@ -207,15 +208,17 @@ module draw_triangle_old(size=10, depth=material_thickness) {
     linear_extrude(depth) polygon(points=[[0, 0], [size, 0], [0, size]], paths=[[0, 1, 2]]);
 }
 
-module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness+10, screw_hole_thickness=4, feet_screw_dia=5.5, screw_hole_side_alt=true) {
+module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness+10, feet_holes=true, feet_screw_dia=5.5, screw_hole_side_alt=true) {
+    screw_hole_thickness=(feet_holes ? thickness*2 : 0);
+
     difference() {
         translate([-thickness, -thickness]) hull() {
             cube([(thickness), size + (thickness), thickness/2]);
             cube([size + (thickness), (thickness), thickness/2]);
             if (screw_hole_thickness != 0) {
-                rotate([0, 0, screw_hole_side_alt ? 90 : 0]) translate([0, thickness-screw_hole_thickness, -depth]) cube([size + (thickness), screw_hole_thickness, depth+1]);
+                rotate([0, 0, screw_hole_side_alt ? 90 : 0]) translate([0, thickness-screw_hole_thickness, -depth]) cube([size + (thickness), screw_hole_thickness, depth+thickness/2]);
             }
-            translate([0, 0, -depth]) cube([size + thickness, thickness, depth+1]);
+            translate([0, 0, -depth]) cube([size + thickness, thickness, depth]);
             translate([0, 0, -depth]) cube([(thickness), size + (thickness), thickness/2]);
         }
         translate([-0.1, -0.1, -depth-1]) cube([size+0.1, size+0.1, depth+1]);
@@ -234,10 +237,10 @@ module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness
 }
 
 module draw_corner_tris() {
-    translate([0, -material_thickness, -material_thickness]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size);
-    translate([0, filter_width+material_thickness, -material_thickness]) rotate([90, 0, 270]) draw_triangle(size=corner_tri_size);
-    translate([0, filter_width+material_thickness, filter_height+material_thickness]) rotate([90, 90, 270]) draw_triangle(size=corner_tri_size);
-    translate([0, -material_thickness, filter_height+material_thickness]) rotate([270, 0, 0]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size);
+    translate([0, -material_thickness, -material_thickness]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness);
+    translate([0, filter_width+material_thickness, -material_thickness]) rotate([90, 0, 270]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, screw_hole_side_alt=false);
+    translate([0, filter_width+material_thickness, filter_height+material_thickness]) rotate([90, 90, 270]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=false);
+    translate([0, -material_thickness, filter_height+material_thickness]) rotate([270, 0, 0]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=false);
 }
 
 module draw_preview () {
@@ -268,7 +271,7 @@ module draw_projections() {
 }
 
 if (triangle_only) {
-    rotate([90, 0, 0]) draw_triangle(size=corner_tri_size, thickness=2, screw_hole_thickness=(draw_triangle_with_feet_holes ? 4 : 0), screw_hole_side_alt=draw_triangle_with_alt_holes);
+    rotate([90, 0, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=draw_triangle_with_feet_holes, screw_hole_side_alt=draw_triangle_with_alt_holes);
 }
 else if ($preview == true) {
     draw_preview();
