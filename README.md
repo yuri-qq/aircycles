@@ -167,10 +167,11 @@ The openscad source files are at the root:
 * `fan-shroud.scad`: For 3D printing
 * `power-mount-cylinder.scad`: For 3D printing
 
-And these two optional parts:
+And these three optional parts:
 
 * `fan-cover.scad`: For 3D printing, alternative to the shroud when one fan is missing.
 * `power-mount-flat.scad`: For 3D printing, simpler version of the power mount
+* `foot.scad`: For 3D printing, alternative to buying rubber feet. Preferably print with flexible filament such as TPU.
 
 The `rendered` subdirectory contains dxf (for laser cutting) and stl (for 3D printing) files for 4mm and 6mm material thickness, all with 498x498x20mm filters and 120mm fans.
 
