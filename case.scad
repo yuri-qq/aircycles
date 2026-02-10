@@ -38,6 +38,8 @@ triangle_only = false;
 draw_triangle_with_feet_holes = true;
 draw_triangle_with_alt_holes = true;
 
+draw_handle_screw_holes = true;
+
 // TODO: something for power port
 
 module draw_teeth(even=true) {
@@ -95,14 +97,22 @@ module draw_fan_mount() {
     #translate([-debug_fan_dia/2, -debug_fan_dia/2, -debug_fan_height]) cube([debug_fan_dia, debug_fan_dia, debug_fan_height]);
 }
 
-module draw_fan_side(fan_count, length, teeth_even=true) {
+module draw_fan_side(fan_count, length, teeth_even=true, handle=false) {
+    assert(!handle || fan_count % 2 == 0, "Handle can only be added with an even number of fans!");
+
+    loop_count = handle ? fan_count + 1 : fan_count;
+
     // fan_gap = (filter_width % fan_dia) / floor(filter_width / fan_dia);
-    fan_gap = (length - (fan_count * fan_dia)) / fan_count;
+    fan_gap = (length - (loop_count * fan_dia)) / loop_count;
 
     difference() {
         draw_outer_side(length=length, teeth_even=teeth_even);
-        translate([0, fan_gap/2, 0]) for (offset_by = [fan_dia/2:fan_dia + fan_gap:length]) {
-            translate([overall_depth/2, offset_by, 0]) draw_fan_mount();
+
+        translate([0, fan_gap/2, 0]) for (i = [0:1:loop_count-1]) {
+            offset_by = fan_dia/2 + (fan_dia + fan_gap) * i;
+            if(handle==false || i != floor(loop_count / 2)) {
+                translate([overall_depth/2, offset_by, 0]) draw_fan_mount();
+            }
         }
     }
 }
@@ -243,12 +253,24 @@ module draw_corner_tris() {
     translate([0, -material_thickness, filter_height+material_thickness]) rotate([270, 0, 0]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=false);
 }
 
+module draw_handle_screw_holes(length=180, height=72, thickness=18, angle=17, screw_hole_dia=6) {
+    handle_offset=thickness/sin(90-angle);
+    translate([overall_depth/2, filter_width/2, -0.05]) {
+        translate([0, length/2-handle_offset/2, 0]) cylinder(material_thickness+0.1, screw_hole_dia/2, screw_hole_dia/2);
+        translate([0, -length/2+handle_offset/2, 0]) cylinder(material_thickness+0.1, screw_hole_dia/2, screw_hole_dia/2);
+    }
+}
+
 module draw_preview () {
     translate([filter_depth, 0, 0]) draw_middle_fit_both();
     translate([overall_depth - filter_depth - material_thickness, 0, 0]) draw_middle_fit_both();
 
-    translate([0, 0, filter_height]) draw_fan_side(fan_count=primary_fans_count, length=filter_width);
-    rotate([90, 0, 0]) color("yellow") draw_fan_side(fan_count=secondary_fans_count, length=filter_height, teeth_even=false);
+    translate([0, 0, filter_height]) difference() {
+        draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
+        if(draw_handle_screw_holes) draw_handle_screw_holes();
+    }
+
+    rotate([90, 0, 0]) color("yellow") draw_fan_side(fan_count=primary_fans_count, length=filter_height, teeth_even=false);
     translate([0, 0, -material_thickness]) draw_outer_side(length=filter_width);
     translate([0, filter_width + material_thickness, 0]) color("yellow") rotate([90, 0, 0]) draw_power_side(length=filter_height, teeth_even=false);
 
@@ -258,11 +280,14 @@ module draw_preview () {
 
 module draw_projections() {
     // fan side
-    projection(cut = true) draw_fan_side(fan_count=primary_fans_count, length=filter_width);
+    projection(cut = true) difference() {
+        draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
+        if(draw_handle_screw_holes) draw_handle_screw_holes();
+    }
     // bottom
     translate([0, filter_width*1.1, 0]) projection(cut = true) draw_outer_side(length=filter_width);
     // sides
-    translate([overall_depth*1.1, 0, 0]) projection(cut = true) draw_fan_side(fan_count=secondary_fans_count, length=filter_height, teeth_even=false);
+    translate([overall_depth*1.1, 0, 0]) projection(cut = true) draw_fan_side(fan_count=primary_fans_count, length=filter_height, teeth_even=false);
     translate([overall_depth*1.1, filter_height*1.1, 0]) projection(cut = true) draw_power_side(length=filter_height, teeth_even=false);
     // middle brackets, A
     for (a = [0:3]) {
