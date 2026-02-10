@@ -38,6 +38,8 @@ triangle_only = false;
 draw_triangle_with_feet_holes = true;
 draw_triangle_with_alt_holes = true;
 
+draw_center_handle_screw_holes = false;
+
 // TODO: something for power port
 
 module draw_teeth(even=true) {
@@ -243,11 +245,23 @@ module draw_corner_tris() {
     translate([0, -material_thickness, filter_height+material_thickness]) rotate([270, 0, 0]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=false);
 }
 
+module draw_handle_screw_holes(length=200, height=72, thickness=18, angle=17, screw_hole_dia=6) {
+    handle_offset=thickness/sin(90-angle);
+    translate([overall_depth/2, filter_width/2, -0.05]) {
+        translate([0, length/2-handle_offset/2, 0]) cylinder(material_thickness+0.1, screw_hole_dia/2, screw_hole_dia/2);
+        translate([0, -length/2+handle_offset/2, 0]) cylinder(material_thickness+0.1, screw_hole_dia/2, screw_hole_dia/2);
+    }
+}
+
 module draw_preview () {
     translate([filter_depth, 0, 0]) draw_middle_fit_both();
     translate([overall_depth - filter_depth - material_thickness, 0, 0]) draw_middle_fit_both();
 
-    translate([0, 0, filter_height]) draw_fan_side(fan_count=primary_fans_count, length=filter_width);
+    translate([0, 0, filter_height]) difference() {
+        draw_fan_side(fan_count=primary_fans_count, length=filter_width);
+        if(draw_center_handle_screw_holes) draw_handle_screw_holes();
+    }
+
     rotate([90, 0, 0]) color("yellow") draw_fan_side(fan_count=secondary_fans_count, length=filter_height, teeth_even=false);
     translate([0, 0, -material_thickness]) draw_outer_side(length=filter_width);
     translate([0, filter_width + material_thickness, 0]) color("yellow") rotate([90, 0, 0]) draw_power_side(length=filter_height, teeth_even=false);
@@ -258,7 +272,10 @@ module draw_preview () {
 
 module draw_projections() {
     // fan side
-    projection(cut = true) draw_fan_side(fan_count=primary_fans_count, length=filter_width);
+    projection(cut = true) difference() {
+        draw_fan_side(fan_count=primary_fans_count, length=filter_width);
+        if(draw_center_handle_screw_holes) draw_handle_screw_holes();
+    }
     // bottom
     translate([0, filter_width*1.1, 0]) projection(cut = true) draw_outer_side(length=filter_width);
     // sides

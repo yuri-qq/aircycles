@@ -167,11 +167,12 @@ The openscad source files are at the root:
 * `fan-shroud.scad`: For 3D printing
 * `power-mount-cylinder.scad`: For 3D printing
 
-And these three optional parts:
+And these four optional parts:
 
 * `fan-cover.scad`: For 3D printing, alternative to the shroud when one fan is missing.
 * `power-mount-flat.scad`: For 3D printing, simpler version of the power mount
 * `foot.scad`: For 3D printing, alternative to buying rubber feet. Preferably print with flexible filament such as TPU.
+* `handle.scad`: For 3D printing
 
 The `rendered` subdirectory contains dxf (for laser cutting) and stl (for 3D printing) files for 4mm and 6mm material thickness, all with 498x498x20mm filters and 120mm fans.
 
@@ -184,12 +185,25 @@ A complete unit is made of these parts:
 * 5x fan-shroud.stl (or fan-cover.stl)
 * 1x power-mount-cylinder.stl or power-mount-flat.stl
 
+And optionally these parts:
+* 4x foot.stl
+* 1x handle-center.stl or 2x handle-side.stl
+
+If you decide to use the side handles, additionally print
+
+* 2x corner-?mm-feet.stl
+* 2x corner-?mm-feetalt.stl
+
+instead of
+
+* 4x corner-?mm-nofeet.stl
+
 ### Steps
 
 * Buy wood
 * Laser cut box out of wood
 * Optionally postprocess wood (sanding, coating)
-* 3D print corners, shrouds, power mount
+* 3D print corners, shrouds, power mount and optionally handle(s)
     * The files are already in the preferred print orientation
     * 0.25mm layer height is fine
     * PETG preferred
@@ -206,6 +220,7 @@ A complete unit is made of these parts:
 * Install one half of the corners (4)
 * Put in the filters
 * Then install the last 4 corners
+* Optionally install the handle(s)
 
 ### Costs
 
