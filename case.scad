@@ -211,14 +211,14 @@ module draw_triangle_old(size=10, depth=material_thickness) {
 }
 
 module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness+10, feet_holes=true, feet_screw_dia=5.5, screw_hole_side_alt=true) {
-    screw_hole_thickness=(feet_holes ? thickness*2 : 0);
+    screw_hole_thickness=(feet_holes ? thickness+2 : 0);
 
     difference() {
         translate([-thickness, -thickness]) hull() {
             cube([(thickness), size + (thickness), thickness/2]);
             cube([size + (thickness), (thickness), thickness/2]);
             if (screw_hole_thickness != 0) {
-                rotate([0, 0, screw_hole_side_alt ? 90 : 0]) translate([0, thickness-screw_hole_thickness, -depth]) cube([size + (thickness), screw_hole_thickness, depth+thickness/2]);
+                rotate([0, 0, screw_hole_side_alt ? 90 : 0]) translate([0, screw_hole_side_alt ? -thickness: thickness-screw_hole_thickness, -depth]) cube([size + (thickness), screw_hole_thickness, depth+thickness/2]);
             }
             translate([0, 0, -depth]) cube([size + thickness, thickness, depth]);
             translate([0, 0, -depth]) cube([(thickness), size + (thickness), thickness/2]);
