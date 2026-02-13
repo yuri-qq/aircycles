@@ -28,7 +28,7 @@ middle_piece_teeth_size = 20;
 middle_piece_teeth_count = 4;  // must be an even number
 
 corner_tri_size = 50;
-corner_tri_thickness = 2;
+corner_tri_thickness = 3;
 screw_hole_side_offsets = [10+material_thickness, corner_tri_size-10-material_thickness];
 screw_hole_inward_offset = filter_depth + material_thickness + 3;
 
