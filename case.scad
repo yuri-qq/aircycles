@@ -210,7 +210,7 @@ module draw_triangle_old(size=10, depth=material_thickness) {
     linear_extrude(depth) polygon(points=[[0, 0], [size, 0], [0, size]], paths=[[0, 1, 2]]);
 }
 
-module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness+10, feet_holes=true, feet_screw_dia=5.5, screw_hole_side_alt=true) {
+module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness+10, feet_holes=true, feet_screw_dia=6, screw_hole_side_alt=true) {
     screw_hole_thickness=(feet_holes ? thickness+2 : 0);
 
     difference() {
@@ -226,7 +226,7 @@ module draw_triangle(size=10, thickness=2, depth=filter_depth+material_thickness
         translate([-0.1, -0.1, -depth-1]) cube([size+0.1, size+0.1, depth+1]);
 
         if (screw_hole_thickness != 0) {
-            # translate([screw_hole_side_alt ? -screw_hole_thickness : 0, 0, 0]) rotate([0, 0, screw_hole_side_alt ? 90 : 0]) translate([(screw_hole_dia/2)+(size/2), 0.25, (screw_hole_dia/-2)-(depth/2)+7]) rotate([90, 0, 0]) cylinder(h=screw_hole_thickness+0.5, d1=triangle_screw_hole_dia*0.9, d2=triangle_screw_hole_dia);
+            # translate([screw_hole_side_alt ? -screw_hole_thickness : 0, 0, 0]) rotate([0, 0, screw_hole_side_alt ? 90 : 0]) translate([(screw_hole_dia/2)+(size/2), 0.25, (screw_hole_dia/-2)-(depth/2)+7]) rotate([90, 0, 0]) cylinder(h=screw_hole_thickness+0.5, d=feet_screw_dia);
         }
 
         for(screw_hole_side_offset_base = screw_hole_side_offsets) {
