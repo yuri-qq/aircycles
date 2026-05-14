@@ -1,5 +1,9 @@
 $fn=128;
 
+use <fan-shroud.scad>
+use <handle.scad>
+use <power-mount-cylinder.scad>
+
 filter_width = 498+2+5;
 filter_height = 498+2+5;
 filter_depth = 20+2;
@@ -39,6 +43,12 @@ draw_triangle_with_feet_holes = true;
 draw_triangle_with_alt_holes = true;
 
 draw_handle_screw_holes = true;
+handle_screw_hole_dia = 4.5;
+handle_washer_hole_dia = 10.5;
+handle_length = 180;
+handle_height = 65;
+handle_thickness = 18;
+handle_angle = 17;
 
 render_for_3d_printing = false;
 filter_side_joint_count = 2;
@@ -51,6 +61,10 @@ middle_fit_joint_depth = 6;
 middle_fit_joint_inner_width = 8;
 middle_fit_joint_outer_width = 12;
 
+preview_fan_shrouds = false;
+preview_handle = true;
+preview_power_mount = true;
+
 // TODO: something for power port
 
 module draw_teeth(even=true) {
@@ -61,10 +75,10 @@ module draw_teeth(even=true) {
     }
 }
 
-module draw_dovetail_joint(length, depth, inner_width, outer_width, tolerance=0.2) {
+module draw_dovetail_joint(length, depth, inner_width, outer_width, tolerance=0.2) {  
     // calculate offset to keep tolerance at the corners
     dovetail_offset = tolerance / (depth / sqrt(pow(outer_width - inner_width, 2) + pow(depth, 2)));
-
+    
     #linear_extrude(material_thickness) polygon(points=[
                 [0, 0],
                 [0, tolerance],
@@ -74,7 +88,7 @@ module draw_dovetail_joint(length, depth, inner_width, outer_width, tolerance=0.
                 [length/2+inner_width/2, tolerance],
                 [length, tolerance],
                 [length, 0],
-
+    
                 [length/2+inner_width/2-dovetail_offset, 0],
                 [length/2+outer_width/2-dovetail_offset, depth-tolerance],
                 [length/2-outer_width/2+dovetail_offset, depth-tolerance],
@@ -109,7 +123,7 @@ module draw_outer_side(length, teeth_even=true) {
             }
         }
         }
-
+        
         if(render_for_3d_printing && !$preview) {
             for(i=[1:1:filter_side_joint_count]) {
                 #translate([0, i*(length/(filter_side_joint_count+1)), 0]) draw_dovetail_joint(overall_depth, filter_side_joint_depth, filter_side_joint_inner_width, filter_side_joint_outer_width);
@@ -153,6 +167,23 @@ module draw_fan_side(fan_count, length, teeth_even=true, handle=false) {
                 translate([overall_depth/2, offset_by, 0]) draw_fan_mount();
             }
         }
+        
+        if(handle) draw_handle_screw_holes(handle_length, handle_height, handle_thickness, handle_angle);
+    }
+    
+    if($preview) {
+        if(handle && preview_handle) {
+            translate([overall_depth/2+handle_thickness/2, filter_width/2-handle_length/2, material_thickness])  draw_handle(handle_length, handle_height, handle_thickness, handle_angle, handle_screw_hole_dia, handle_washer_hole_dia);
+        }
+    
+        if(preview_fan_shrouds) {
+            translate([0, fan_gap/2, 0]) for (i = [0:1:loop_count-1]) {
+                offset_by = fan_dia/2 + (fan_dia + fan_gap) * i;
+                if(handle==false || i != floor(loop_count / 2)) {
+                    translate([overall_depth/2, offset_by, material_thickness]) rotate([0,0,90]) draw_fan_shroud();
+                }
+            }
+        }
     }
 }
 
@@ -161,6 +192,8 @@ module draw_power_side(length, teeth_even=true) {
         draw_outer_side(length=length, teeth_even=teeth_even);
         translate([overall_depth/2, length/4, 0]) draw_power_mount();
     }
+    
+    if($preview && preview_power_mount) translate([overall_depth/2, length/4, 0]) rotate([0,180,90]) draw_power_mount_cylinder();
 }
 
 module draw_middle_fit_old() {
@@ -245,14 +278,14 @@ module draw_middle_fit_corner(flip=false) {
                 [height/2, 0],
             ]
         );
-
-        //rotate([0,-90,0]) translate([0,0,-material_thickness])
-
+      
+        //rotate([0,-90,0]) translate([0,0,-material_thickness]) 
+      
         if(render_for_3d_printing && !$preview) {
             for(i=[1:1:middle_fit_height_joint_count]) {
                 rotate([90,0,0]) translate([material_thickness, i*(height/(middle_fit_height_joint_count+1)), -middle_piece_border_size]) rotate([0,-90,0]) draw_dovetail_joint(middle_piece_border_size, middle_fit_joint_depth, middle_fit_joint_inner_width, middle_fit_joint_outer_width);
             }
-
+            
             for(i=[1:1:middle_fit_width_joint_count]) {
                 translate([material_thickness, i*(width/2/(middle_fit_width_joint_count+1)), 0]) rotate([0,-90,0]) draw_dovetail_joint(middle_piece_border_size, middle_fit_joint_depth, middle_fit_joint_inner_width, middle_fit_joint_outer_width);
                 translate([material_thickness, i*(width/2/(middle_fit_width_joint_count+1)), height - middle_piece_border_size]) rotate([0,-90,0]) draw_dovetail_joint(middle_piece_border_size, middle_fit_joint_depth, middle_fit_joint_inner_width, middle_fit_joint_outer_width);
@@ -307,7 +340,7 @@ module draw_corner_tris() {
     translate([0, -material_thickness, filter_height+material_thickness]) rotate([270, 0, 0]) rotate([0, 270, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=false);
 }
 
-module draw_handle_screw_holes(length=180, height=72, thickness=18, angle=17, screw_hole_dia=6) {
+module draw_handle_screw_holes(length, heigh, thickness, angle, screw_hole_dia=6) {
     handle_offset=thickness/sin(90-angle);
     translate([overall_depth/2, filter_width/2, -0.05]) {
         translate([0, length/2-handle_offset/2, 0]) cylinder(material_thickness+0.1, screw_hole_dia/2, screw_hole_dia/2);
@@ -315,29 +348,22 @@ module draw_handle_screw_holes(length=180, height=72, thickness=18, angle=17, sc
     }
 }
 
-module draw_preview () {
+module draw_preview() {
     translate([filter_depth, 0, 0]) draw_middle_fit_both();
     translate([overall_depth - filter_depth - material_thickness, 0, 0]) draw_middle_fit_both();
-    
-    translate([0, 0, filter_height]) difference() {
-        draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
-        if(draw_handle_screw_holes) draw_handle_screw_holes();
-    }
 
+    translate([0, 0, filter_height]) draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
     rotate([90, 0, 0]) color("yellow") draw_fan_side(fan_count=primary_fans_count, length=filter_height, teeth_even=false);
     translate([0, 0, -material_thickness]) draw_outer_side(length=filter_width);
     translate([0, filter_width + material_thickness, 0]) color("yellow") rotate([90, 0, 0]) draw_power_side(length=filter_height, teeth_even=false);
 
     color("green") draw_corner_tris();
-    color("green") translate([overall_depth, filter_width, 0]) rotate([0, 0, 180])  draw_corner_tris();
+    color("green") translate([overall_depth, filter_width, 0]) rotate([0, 0, 180]) draw_corner_tris();
 }
 
 module draw_projections() {
     // fan side
-    projection(cut = true) difference() {
-        draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
-        if(draw_handle_screw_holes) draw_handle_screw_holes();
-    }
+    projection(cut = true) draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
     // bottom
     translate([0, filter_width*1.1, 0]) projection(cut = true) draw_outer_side(length=filter_width);
     // sides
@@ -351,10 +377,7 @@ module draw_projections() {
 
 module draw_3d_printing_parts() {
     // fan side
-    difference() {
-        draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
-        if(draw_handle_screw_holes) draw_handle_screw_holes();
-    }
+    draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
     // bottom
     translate([0, filter_width*1.1, 0]) draw_outer_side(length=filter_width);
     // sides
