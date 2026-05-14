@@ -40,6 +40,17 @@ draw_triangle_with_alt_holes = true;
 
 draw_handle_screw_holes = true;
 
+render_for_3d_printing = false;
+filter_side_joint_count = 2;
+filter_side_joint_depth = 10;
+filter_side_joint_inner_width = 90;
+filter_side_joint_outer_width = 100;
+middle_fit_height_joint_count = 2;
+middle_fit_width_joint_count = 1;
+middle_fit_joint_depth = 6;
+middle_fit_joint_inner_width = 8;
+middle_fit_joint_outer_width = 12;
+
 // TODO: something for power port
 
 module draw_teeth(even=true) {
@@ -48,6 +59,28 @@ module draw_teeth(even=true) {
             translate([i * overall_depth / corner_teeth_count, 0]) cube([overall_depth / corner_teeth_count, material_thickness, material_thickness]);
         }
     }
+}
+
+module draw_dovetail_joint(length, depth, inner_width, outer_width, tolerance=0.2) {
+    // calculate offset to keep tolerance at the corners
+    dovetail_offset = tolerance / (depth / sqrt(pow(outer_width - inner_width, 2) + pow(depth, 2)));
+
+    #linear_extrude(material_thickness) polygon(points=[
+                [0, 0],
+                [0, tolerance],
+                [length/2-inner_width/2, tolerance],
+                [length/2-outer_width/2, depth],
+                [length/2+outer_width/2, depth],
+                [length/2+inner_width/2, tolerance],
+                [length, tolerance],
+                [length, 0],
+
+                [length/2+inner_width/2-dovetail_offset, 0],
+                [length/2+outer_width/2-dovetail_offset, depth-tolerance],
+                [length/2-outer_width/2+dovetail_offset, depth-tolerance],
+                [length/2-inner_width/2+dovetail_offset, 0],
+                [0, 0],
+            ]);
 }
 
 module draw_outer_side(length, teeth_even=true) {
@@ -75,6 +108,12 @@ module draw_outer_side(length, teeth_even=true) {
             translate([hole_overall_inward_offset, hole_overall_side_offset, -5]) cylinder(h=material_thickness+10, d=corner_screw_hole_dia);
             }
         }
+        }
+
+        if(render_for_3d_printing && !$preview) {
+            for(i=[1:1:filter_side_joint_count]) {
+                #translate([0, i*(length/(filter_side_joint_count+1)), 0]) draw_dovetail_joint(overall_depth, filter_side_joint_depth, filter_side_joint_inner_width, filter_side_joint_outer_width);
+            }
         }
     }
 }
@@ -172,39 +211,54 @@ module draw_middle_fit_corner(flip=false) {
 
     draw_middle_fit_hole(flip);
 
-    rotate([90, 0, 90]) linear_extrude(material_thickness) polygon(points=[
-            [0, 0],
-            [0, width],
+    difference() {
+        rotate([90, 0, 90]) linear_extrude(material_thickness) polygon(points=[
+                [0, 0],
+                [0, width],
 
-            // top half
-            [height/2, width],
-            // top half fitting thing
-            [height/2, width - (middle_piece_border_size*0.35)],
-            [height/2 - down_by, width - (middle_piece_border_size*0.35)],
-            [height/2 - down_by, width - (middle_piece_border_size*0.2)],
-            [height/2 - down_by_2, width - (middle_piece_border_size*0.2)],
-            [height/2 - down_by_2, width - (middle_piece_border_size*0.8)],
-            [height/2 - down_by, width - (middle_piece_border_size*0.8)],
-            [height/2 - down_by, width - (middle_piece_border_size*0.65)],
-            [height/2, width - (middle_piece_border_size*0.65)],
-            [height/2, width - middle_piece_border_size],
-            [middle_piece_border_size, width - middle_piece_border_size],
+                // top half
+                [height/2, width],
+                // top half fitting thing
+                [height/2, width - (middle_piece_border_size*0.35)],
+                [height/2 - down_by, width - (middle_piece_border_size*0.35)],
+                [height/2 - down_by, width - (middle_piece_border_size*0.2)],
+                [height/2 - down_by_2, width - (middle_piece_border_size*0.2)],
+                [height/2 - down_by_2, width - (middle_piece_border_size*0.8)],
+                [height/2 - down_by, width - (middle_piece_border_size*0.8)],
+                [height/2 - down_by, width - (middle_piece_border_size*0.65)],
+                [height/2, width - (middle_piece_border_size*0.65)],
+                [height/2, width - middle_piece_border_size],
+                [middle_piece_border_size, width - middle_piece_border_size],
 
-            [middle_piece_border_size, middle_piece_border_size],
-            [height/2, middle_piece_border_size],
+                [middle_piece_border_size, middle_piece_border_size],
+                [height/2, middle_piece_border_size],
 
-            [height/2, middle_piece_border_size*0.65],
-            [height/2 + down_by, middle_piece_border_size*0.65],
-            [height/2 + down_by, middle_piece_border_size*0.8],
-            [height/2 + down_by_2, middle_piece_border_size*0.8],
-            [height/2 + down_by_2, middle_piece_border_size*0.2],
-            [height/2 + down_by, middle_piece_border_size*0.2],
-            [height/2 + down_by, middle_piece_border_size*0.35],
-            [height/2, middle_piece_border_size*0.35],
+                [height/2, middle_piece_border_size*0.65],
+                [height/2 + down_by, middle_piece_border_size*0.65],
+                [height/2 + down_by, middle_piece_border_size*0.8],
+                [height/2 + down_by_2, middle_piece_border_size*0.8],
+                [height/2 + down_by_2, middle_piece_border_size*0.2],
+                [height/2 + down_by, middle_piece_border_size*0.2],
+                [height/2 + down_by, middle_piece_border_size*0.35],
+                [height/2, middle_piece_border_size*0.35],
 
-            [height/2, 0],
-        ]
-    );
+                [height/2, 0],
+            ]
+        );
+
+        //rotate([0,-90,0]) translate([0,0,-material_thickness])
+
+        if(render_for_3d_printing && !$preview) {
+            for(i=[1:1:middle_fit_height_joint_count]) {
+                rotate([90,0,0]) translate([material_thickness, i*(height/(middle_fit_height_joint_count+1)), -middle_piece_border_size]) rotate([0,-90,0]) draw_dovetail_joint(middle_piece_border_size, middle_fit_joint_depth, middle_fit_joint_inner_width, middle_fit_joint_outer_width);
+            }
+
+            for(i=[1:1:middle_fit_width_joint_count]) {
+                translate([material_thickness, i*(width/2/(middle_fit_width_joint_count+1)), 0]) rotate([0,-90,0]) draw_dovetail_joint(middle_piece_border_size, middle_fit_joint_depth, middle_fit_joint_inner_width, middle_fit_joint_outer_width);
+                translate([material_thickness, i*(width/2/(middle_fit_width_joint_count+1)), height - middle_piece_border_size]) rotate([0,-90,0]) draw_dovetail_joint(middle_piece_border_size, middle_fit_joint_depth, middle_fit_joint_inner_width, middle_fit_joint_outer_width);
+            }
+        }
+    }
 }
 
 // !draw_middle_fit_corner();
@@ -264,7 +318,7 @@ module draw_handle_screw_holes(length=180, height=72, thickness=18, angle=17, sc
 module draw_preview () {
     translate([filter_depth, 0, 0]) draw_middle_fit_both();
     translate([overall_depth - filter_depth - material_thickness, 0, 0]) draw_middle_fit_both();
-
+    
     translate([0, 0, filter_height]) difference() {
         draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
         if(draw_handle_screw_holes) draw_handle_screw_holes();
@@ -295,11 +349,31 @@ module draw_projections() {
     }
 }
 
+module draw_3d_printing_parts() {
+    // fan side
+    difference() {
+        draw_fan_side(fan_count=secondary_fans_count, length=filter_width, handle=draw_handle_screw_holes);
+        if(draw_handle_screw_holes) draw_handle_screw_holes();
+    }
+    // bottom
+    translate([0, filter_width*1.1, 0]) draw_outer_side(length=filter_width);
+    // sides
+    translate([overall_depth*1.1, 0, 0]) draw_fan_side(fan_count=primary_fans_count, length=filter_height, teeth_even=false);
+    translate([overall_depth*1.1, filter_height*1.1, 0]) draw_power_side(length=filter_height, teeth_even=false);
+    // middle brackets, A
+    for (a = [0:3]) {
+        translate([overall_depth*2.2, a*filter_width*0.6, 0]) rotate([0, 90, 0]) draw_middle_fit_corner();
+    }
+}
+
 if (triangle_only) {
     rotate([90, 0, 0]) draw_triangle(size=corner_tri_size, thickness=corner_tri_thickness, feet_holes=draw_triangle_with_feet_holes, screw_hole_side_alt=draw_triangle_with_alt_holes);
 }
 else if ($preview == true) {
     draw_preview();
+}
+else if (render_for_3d_printing) {
+    draw_3d_printing_parts();
 }
 else {
     draw_projections();
